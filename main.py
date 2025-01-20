@@ -1,3 +1,9 @@
+import openai
+from database import initialize_db, add_product, get_products_by_skin_type
+
+# Set your OpenAI API key
+openai.api_key = ""
+
 def get_skin_type_or_concern():
     print("\nWhat is your skin type or specific concern?:")
     print("1. Oily")
@@ -19,43 +25,73 @@ def get_skin_type_or_concern():
         print("Invalid input, please enter a number between 1 and 4.")
         return get_skin_type_or_concern()
 
-def generate_recommendations(skin_type):
-    recommendations = []
-
-    # Face wash recommendations based on skin type
-    if skin_type == "oily":
-        recommendations.append("\nWe recommend 2 cleansers for oily skin: \n1. Origins Checks and Balances Frothy Face Wash\n2. Peach and Lily Ginger Melt Cleanser")
-    elif skin_type == "dry":
-        recommendations.append("\nWe recommend 2 hydrating cleansers: \n1. Paula’s Choice Softening Cream Cleanser\n2. La Roche Posay Toleraine Hydrating Gentle Cleanser")
-    elif skin_type == "combination":
-        recommendations.append("\nWe recommend 2 cleansers for combination skin: \n1. Rephr Gentle Cleanser\n2. Beauty of Joseon Green Plum")
-    elif skin_type == "normal":
-        recommendations.append("\nWe recommend 3 cleansers for normal skin: \n1. Green Plum by Beauty of Joseon\n2. Rephr Cleanser\n3. Dermalogica Daily Milkfoliant")
-
-    # Face lotion recommendations based on skin type
-    if skin_type == "oily":
-        recommendations.append("\nWe recommend 2 lotions for oily skin: \n1. Clinique Moisture Surge 100h\n2. Benefit Smooth Sip")
-    elif skin_type == "dry":
-        recommendations.append("\nWe have 2 lotion recommendations for dry skin: \n1. Tula 24/7 Moisturizer\n2. Peach and Lily Rescue Party Barrier Comfort Cream")
-    elif skin_type == "combination":
-        recommendations.append("\nWe recommend 2 lotions for combination skin: \n1. Peach and Lily Matcha Pudding\n2. Tatcha Water Cream")
-    elif skin_type == "normal":
-        recommendations.append("\nWe have 3 lotion recommendations for normal skin: \n1. Peach & Lily Matcha Pudding\n2. Clinique Moisture Surge 100h\n3. Good Molecules Lightweight Daily Moisturizer")
-
-    return recommendations
+def get_ai_advice(skin_type, product_type):
+    # Generate personalized skincare advice using OpenAI's gpt-3.5-turbo model
+    prompt = f"Provide skincare advice for someone with {skin_type} skin, focusing on {product_type}."
+    
+    # Updated API call using the new OpenAI library
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # or another available model
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+    )
+    
+    return response['choices'][0]['message']['content']
 
 def main():
     print("Welcome to your personalized Skincare Assistant!")
 
+    # Initialize the database
+    initialize_db()
+
+    # Example: Adding some products to the database
+    add_product("Origins Checks and Balances Frothy Face Wash", "cleanser", "oily", "A frothy face wash for oily skin.")
+    add_product("Peach and Lily Ginger Melt Cleanser", "cleanser", "oily", "A gentle cleanser for oily skin.")
+    add_product("Paula’s Choice Softening Cream Cleanser", "cleanser", "dry", "A hydrating cream cleanser for dry skin.")
+    add_product("La Roche Posay Toleraine Hydrating Gentle Cleanser", "cleanser", "dry", "A gentle hydrating cleanser for dry skin.")
+    add_product("Rephr Gentle Cleanser", "cleanser", "combination", "A gentle cleanser for combination skin.")
+    add_product("Beauty of Joseon Green Plum", "cleanser", "combination", "A refreshing cleanser for combination skin.")
+    add_product("Clinique Moisture Surge 100h", "lotion", "oily", "A lightweight moisturizer for oily skin.")
+    add_product("Benefit Smooth Sip", "lotion", "oily", "A mattifying lotion for oily skin.")
+    add_product("Tula 24/7 Moisturizer", "lotion", "dry", "A deeply hydrating moisturizer for dry skin.")
+    add_product("Peach and Lily Rescue Party Barrier Comfort Cream", "lotion", "dry", "A barrier-restoring cream for dry skin.")
+    add_product("Peach and Lily Matcha Pudding", "lotion", "combination", "A lightweight moisturizer for combination skin.")
+    add_product("Tatcha Water Cream", "lotion", "combination", "A hydrating water cream for combination skin.")
+    add_product("Good Molecules Lightweight Daily Moisturizer", "lotion", "normal", "A balanced moisturizer for normal skin.")
+
     # Get user skin type or concerns
     skin_type = get_skin_type_or_concern()
 
-    # Generate and display recommendations
-    recommendations = generate_recommendations(skin_type)
+    # Fetch and display recommendations from the database
+    recommendations = get_products_by_skin_type(skin_type)
 
-    print("\nYour personalized skincare recommendations:")
-    for recommendation in recommendations:
-        print(f"- {recommendation}")
+    # Categorize the recommendations into cleansers and lotions
+    cleansers = [product for product in recommendations if product[1] == "cleanser"]
+    lotions = [product for product in recommendations if product[1] == "lotion"]
+
+    # Display cleansers
+    if cleansers:
+        print("\nRecommended Cleansers:")
+        for product in cleansers:
+            name, type, description = product
+            print(f"- {name} ({type}): {description}")
+        
+        # Get AI advice for cleansers
+        ai_advice_cleanser = get_ai_advice(skin_type, "cleansers")
+        print("\nAI Advice for Cleansers:")
+        print(ai_advice_cleanser)
+    
+    # Display lotions
+    if lotions:
+        print("\nRecommended Lotions:")
+        for product in lotions:
+            name, type, description = product
+            print(f"- {name} ({type}): {description}")
+        
+        # Get AI advice for lotions
+        ai_advice_lotion = get_ai_advice(skin_type, "lotions")
+        print("\nAI Advice for Lotions:")
+        print(ai_advice_lotion)
 
 if __name__ == "__main__":
     main()
