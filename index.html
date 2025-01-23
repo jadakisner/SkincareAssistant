@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Skincare Assistant</title>
+
+    <!-- Google Fonts (Elegant Pretty Font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS for Light Pink Theme -->
+    <style>
+        body {
+            background-color: #fce4ec; /* Light Pink Background */
+            font-family: 'Poppins', sans-serif;
+        }
+        .navbar {
+            background-color: #f8bbd0 !important; /* Soft Pink Navbar */
+        }
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #880e4f !important; /* Deep Rose */
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            color: #880e4f;
+        }
+        .form-label {
+            font-weight: bold;
+            color: #ad1457; /* Dark Pink */
+        }
+        .btn-primary {
+            background-color: #d81b60; /* Bright Pink */
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #c2185b; /* Slightly darker pink */
+        }
+        .card {
+            border: none;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-weight: bold;
+            color: #880e4f;
+        }
+        .alert-info {
+            background-color: #f8bbd0;
+            border: none;
+            color: #880e4f;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">Skincare Assistant</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <h1 class="text-center">Find Your Perfect Skincare Routine</h1>
+        <p class="text-center">Select your skin type to get personalized recommendations.</p>
+
+        <!-- Form for Skin Type Selection -->
+        <form method="POST" action="/" class="mt-4">
+            <div class="mb-3">
+                <label class="form-label">Select Your Skin Type:</label>
+                <select name="skin_type" class="form-select">
+                    <option value="oily" {% if selected_skin_type == "oily" %}selected{% endif %}>Oily</option>
+                    <option value="dry" {% if selected_skin_type == "dry" %}selected{% endif %}>Dry</option>
+                    <option value="combination" {% if selected_skin_type == "combination" %}selected{% endif %}>Combination</option>
+                    <option value="normal" {% if selected_skin_type == "normal" %}selected{% endif %}>Normal</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Get Started</button>
+        </form>
+    </div>
+
+    <!-- Display Recommendations -->
+    {% if recommendations %}
+    <div class="container mt-5">
+        <h2 class="text-center">Recommended Products</h2>
+
+        <!-- Display Cleansers -->
+        {% if recommendations.cleansers %}
+        <h3 class="mt-4">Cleansers</h3>
+        <div class="row">
+            {% for product in recommendations.cleansers %}
+            <div class="col-md-6">
+                <div class="card mb-3 p-3">
+                    <h5 class="card-title">{{ product[0] }}</h5>
+                    <p class="card-text">{{ product[2] }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Display Lotions -->
+        {% if recommendations.lotions %}
+        <h3 class="mt-4">Lotions</h3>
+        <div class="row">
+            {% for product in recommendations.lotions %}
+            <div class="col-md-6">
+                <div class="card mb-3 p-3">
+                    <h5 class="card-title">{{ product[0] }}</h5>
+                    <p class="card-text">{{ product[2] }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Display AI Advice -->
+    {% if ai_advice_cleanser or ai_advice_lotion %}
+    <div class="container mt-5">
+        <h2 class="text-center">AI Assistant's Skincare Advice</h2>
+
+        {% if ai_advice_cleanser %}
+        <div class="alert alert-info mt-3">
+            <h4>Advice for Cleansers:</h4>
+            <p>{{ ai_advice_cleanser }}</p>
+        </div>
+        {% endif %}
+
+        {% if ai_advice_lotion %}
+        <div class="alert alert-info mt-3">
+            <h4>Advice for Lotions:</h4>
+            <p>{{ ai_advice_lotion }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
